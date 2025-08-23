@@ -128,7 +128,8 @@ def generate_launch_description():
                 '-y', LaunchConfiguration('spawn_y'),
                 '-z', LaunchConfiguration('spawn_z'),
                 '-Y', LaunchConfiguration('spawn_yaw'),
-            ]
+            ],
+            parameters=[{'use_sim_time': use_sim_time}],
         ),
 
         Node(
