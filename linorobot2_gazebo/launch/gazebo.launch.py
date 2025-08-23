@@ -141,6 +141,8 @@ def generate_launch_description():
                 "/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
                 "/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model",
                 "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+                "/livox@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+                "/livox/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
                 "/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
                 "/camera/image@sensor_msgs/msg/Image[gz.msgs.Image",
                 "/camera/depth_image@sensor_msgs/msg/Image[gz.msgs.Image",
