@@ -21,8 +21,8 @@ options = {
   map_builder = MAP_BUILDER,
   trajectory_builder = TRAJECTORY_BUILDER,
   map_frame = "map",
-  tracking_frame = "base_link",
-  published_frame = "base_link",
+  tracking_frame = "imu_link",
+  published_frame = "odom",
   odom_frame = "odom",
   provide_odom_frame = false,
   publish_frame_projected_to_2d = true,
@@ -43,7 +43,7 @@ options = {
   imu_sampling_ratio = 1.,
   landmarks_sampling_ratio = 1.,
 }
-
+MAP_BUILDER.use_trajectory_builder_2d = false
 MAP_BUILDER.use_trajectory_builder_3d = true
 TRAJECTORY_BUILDER_3D.voxel_filter_size = 0.05
 TRAJECTORY_BUILDER_3D.use_online_correlative_scan_matching = true

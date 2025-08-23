@@ -34,7 +34,7 @@ def generate_launch_description():
     cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
                                                   linorobot2_cartographer_prefix, 'config'))
     configuration_basename = LaunchConfiguration('configuration_basename',
-                                                 default='turtlebot3_lds_2d.lua')
+                                                 default='linorobot2_lds_3d.lua')
 
     resolution = LaunchConfiguration('resolution', default='0.05')
     publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
@@ -66,7 +66,7 @@ def generate_launch_description():
             '-configuration_directory', cartographer_config_dir,
             '-configuration_basename', configuration_basename],
             remappings={
-                ('scan', '/livox'), # PointCloud2 토픽 리매핑
+                ('points2', '/livox/points'), # PointCloud2 토픽 리매핑
                 ('imu', '/imu/data')         # IMU 토픽 리매핑
             }),
 
