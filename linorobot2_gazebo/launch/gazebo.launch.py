@@ -48,6 +48,11 @@ def generate_launch_description():
         [FindPackageShare('linorobot2_description'), 'launch', 'description.launch.py']
     )
 
+    package_name = 'linorobot2_description'
+    pkg_share = PathJoinSubstitution(
+        [FindPackageShare('linorobot2_description'), 'rviz', 'description.rviz'])
+    rviz_config_file = pkg_share
+
     return LaunchDescription([
         DeclareLaunchArgument(
             name='gui', 
@@ -165,6 +170,15 @@ def generate_launch_description():
                 ekf_config_path
             ],
             remappings=[("odometry/filtered", LaunchConfiguration("odom_topic"))]
+        ),
+
+        # RViz node
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            output='screen',
+            arguments=['-d', rviz_config_file],
         ),
 
         IncludeLaunchDescription(
