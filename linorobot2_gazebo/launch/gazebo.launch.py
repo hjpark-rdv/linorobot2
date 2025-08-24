@@ -106,6 +106,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(gazebo_launch_path),
             launch_arguments={
                 'gz_args': [' -r -s ', LaunchConfiguration('world')]
+                # 'gz_args': [' empty.sdf']
             }.items()
         ),
 
