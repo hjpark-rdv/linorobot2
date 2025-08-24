@@ -24,4 +24,8 @@
   <xacro:property name="rear_camera_sensor_pose">
     <origin xyz="-0.2375 0.0 0.255" rpy="0 0 3.14159"/>
   </xacro:property>
+
+  <xacro:property name="mid360_pose">
+    <origin xyz="0 0 0.300" rpy="0 0 0"/>
+  </xacro:property>
 </robot>

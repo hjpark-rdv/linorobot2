@@ -9,6 +9,8 @@
   <xacro:include filename="$(find linorobot2_description)/urdf/sensors/depth_sensor.urdf.xacro" />
   <xacro:include filename="$(find linorobot2_description)/urdf/sensors/camera.urdf.xacro" />
   <xacro:include filename="$(find linorobot2_description)/urdf/controllers/skid_steer.urdf.xacro" />
+  <xacro:include filename="$(find ros2_livox_simulation)/urdf/mid360.xacro" />
+
 
   <xacro:base 
     length="${base_length}" 
@@ -74,6 +76,10 @@
       topic_name="rear_rgb_camera/image">
     <xacro:insert_block name="rear_camera_sensor_pose" />
   </xacro:rgb_camera>
+
+  <xacro:mid360 name="livox" parent="base_link" topic="mid360">
+    <xacro:insert_block name="mid360_pose"/>
+  </xacro:mid360>
 
   <xacro:diff_drive_controller
     wheel_separation="${wheel_pos_y * 2}"
