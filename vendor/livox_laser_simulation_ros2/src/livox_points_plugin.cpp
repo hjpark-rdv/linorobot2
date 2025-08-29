@@ -15,6 +15,7 @@
 #include "ros2_livox/livox_ode_multiray_shape.h"
 #include <livox_ros_driver2/msg/custom_msg.hpp>
 #include <sensor_msgs/point_cloud_conversion.hpp>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
 
 namespace gazebo
 {
@@ -117,43 +118,71 @@ namespace gazebo
     {
         if (!rayShape) return;
 
-        // pair<ray_index, world_frame_ray_direction>
         std::vector<std::pair<int, ignition::math::Vector3d>> points_pair;
         InitializeRays(points_pair, rayShape);
-        
+
         rayShape->Update(); // 물리 엔진에서 충돌 계산 수행
+
+        // =================================================================================
+        // 1. PointCloud2 메시지 초기화
+        // =================================================================================
+        sensor_msgs::msg::PointCloud2 cloud2;
+        cloud2.header.stamp = node_->get_clock()->now();
+        cloud2.header.frame_id = raySensor->Name();
+        cloud2.is_dense = true; // 유효한 포인트만 있다고 가정
+
+        // =================================================================================
+        // 2. PointCloud2Modifier를 사용하여 필드 정의
+        // x, y, z, 반사율, 시간 오프셋, 링 정보를 추가합니다.
+        // =================================================================================
+        sensor_msgs::PointCloud2Modifier modifier(cloud2);
+        modifier.setPointCloud2Fields(
+            6, // 필드의 총 개수
+            "x", 1, sensor_msgs::msg::PointField::FLOAT32,
+            "y", 1, sensor_msgs::msg::PointField::FLOAT32,
+            "z", 1, sensor_msgs::msg::PointField::FLOAT32,
+            "reflectivity", 1, sensor_msgs::msg::PointField::FLOAT32,
+            "offset_time", 1, sensor_msgs::msg::PointField::UINT32,
+            "tag", 1, sensor_msgs::msg::PointField::UINT8 // 'ring' 대신 'tag' 필드를 사용 (보통 laser line ID)
+        );
 
         // CustomMsg 메시지 준비
         livox_ros_driver2::msg::CustomMsg pp_livox;
-        pp_livox.header.stamp = node_->get_clock()->now();
-        pp_livox.header.frame_id = raySensor->Name();
+        pp_livox.header = cloud2.header;
         pp_livox.timebase = pp_livox.header.stamp.sec * 1000000000ull + pp_livox.header.stamp.nanosec;
 
-        // PointCloud2 변환을 위한 중간 PointCloud 메시지 준비
-        sensor_msgs::msg::PointCloud cloud;
-        cloud.header = pp_livox.header;
-        
-        // =========================================================================
-        //  OPTIMIZATION 2: 시간 계산을 위한 상수 미리 계산
-        // =========================================================================
         double update_rate = raySensor->UpdateRate();
         double scan_duration_ns = (update_rate > 0) ? (1.0 / update_rate * 1e9) : 0.0;
         int total_points = points_pair.size();
 
         if (total_points == 0) return;
 
-        for (size_t i = 0; i < total_points; ++i)
+        // 포인트 수만큼 메시지 크기 재설정
+        modifier.resize(total_points);
+        pp_livox.points.reserve(total_points);
+
+        // =================================================================================
+        // 3. 필드별 Iterator 생성
+        // =================================================================================
+        sensor_msgs::PointCloud2Iterator<float> iter_x(cloud2, "x");
+        sensor_msgs::PointCloud2Iterator<float> iter_y(cloud2, "y");
+        sensor_msgs::PointCloud2Iterator<float> iter_z(cloud2, "z");
+        sensor_msgs::PointCloud2Iterator<float> iter_reflectivity(cloud2, "reflectivity");
+        sensor_msgs::PointCloud2Iterator<uint32_t> iter_offset_time(cloud2, "offset_time");
+        sensor_msgs::PointCloud2Iterator<uint8_t> iter_tag(cloud2, "tag");
+
+
+        for (size_t i = 0; i < total_points; ++i, ++iter_x, ++iter_y, ++iter_z, ++iter_reflectivity, ++iter_offset_time, ++iter_tag)
         {
             const auto& pair = points_pair[i];
             int ray_index = pair.first;
-            
+
             double range = rayShape->GetRange(ray_index);
             double intensity = rayShape->GetRetro(ray_index);
 
             if (range >= RangeMax()) range = std::numeric_limits<double>::infinity();
             else if (range <= RangeMin()) range = -std::numeric_limits<double>::infinity();
 
-            // 월드 좌표계 기준 레이 방향을 사용하여 센서 좌표계 기준 포인트 위치 계산
             const auto& world_ray_direction = pair.second;
             auto sensor_pose = raySensor->Pose();
             auto point_in_sensor_frame = sensor_pose.Rot().RotateVectorReverse(range * world_ray_direction);
@@ -164,29 +193,31 @@ namespace gazebo
             p.y = point_in_sensor_frame.Y();
             p.z = point_in_sensor_frame.Z();
             p.reflectivity = intensity;
-
-            // =========================================================================
-            //  OPTIMIZATION 3: 수학적 계산으로 타임스탬프 오프셋 결정
-            // =========================================================================
             p.offset_time = static_cast<uint32_t>((static_cast<double>(i) / total_points) * scan_duration_ns);
+            
+            // NOTE: Livox 모델에 따라 'tag' 또는 'line' 정보 생성 방식이 다릅니다.
+            // 여기서는 예시로 레이저 인덱스를 사용하여 간단히 생성합니다.
+            // 실제 사용하시는 센서의 스펙에 맞게 수정이 필요할 수 있습니다.
+            p.tag = static_cast<uint8_t>(ray_index % 6); // 예: 6개의 레이저를 가정한 '링' 정보
+
             pp_livox.points.push_back(p);
 
-            // PointCloud 포인트 채우기
-            // BUG FIX 4: 중복된 emplace_back 호출 수정
-            geometry_msgs::msg::Point32 p_cloud;
-            p_cloud.x = p.x;
-            p_cloud.y = p.y;
-            p_cloud.z = p.z;
-            cloud.points.push_back(p_cloud);
+            // =========================================================================
+            // 4. PointCloud2 데이터 채우기
+            // Iterator를 사용하여 각 필드에 값을 직접 할당합니다.
+            // =========================================================================
+            *iter_x = p.x;
+            *iter_y = p.y;
+            *iter_z = p.z;
+            *iter_reflectivity = p.reflectivity;
+            *iter_offset_time = p.offset_time;
+            *iter_tag = p.tag;
         }
 
         // 메시지 발행
         pp_livox.point_num = pp_livox.points.size();
         custom_pub->publish(pp_livox);
 
-        sensor_msgs::msg::PointCloud2 cloud2;
-        sensor_msgs::convertPointCloudToPointCloud2(cloud, cloud2);
-        cloud2.header = cloud.header; // 헤더 정보 다시 한번 확인
         cloud2_pub->publish(cloud2);
     }
 
