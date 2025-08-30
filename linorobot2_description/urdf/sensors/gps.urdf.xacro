@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="gps_link"/>
+
+  <joint name="gps_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gps_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/> </joint>
+
+  <gazebo reference="gps_link">
+    <sensor name="gps_sensor" type="gps">
+      <pose>0 0 0 0 0 0</pose>
+      <update_rate>5</update_rate> <always_on>true</always_on>
+      <visualize>false</visualize>
+
+      <plugin name="gazebo_ros_gps" filename="libgazebo_ros_gps_sensor.so">
+        <ros>          
+          <namespace>/gps</namespace>
+          <remapping>~/out:=fix</remapping>
+        </ros>
+        <!-- <home_latitude>37.5665</home_latitude> <home_longitude>126.9780</home_longitude> <home_altitude>38.0</home_altitude> -->
+        <position_sensing>
+          <horizontal>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.0001</stddev> </noise>
+          </horizontal>
+          <vertical>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.0001</stddev> </noise>
+          </vertical>
+        </position_sensing>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

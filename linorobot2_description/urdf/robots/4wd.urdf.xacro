@@ -9,6 +9,7 @@
   <xacro:include filename="$(find linorobot2_description)/urdf/sensors/depth_sensor.urdf.xacro" />
   <xacro:include filename="$(find linorobot2_description)/urdf/sensors/camera.urdf.xacro" />
   <xacro:include filename="$(find linorobot2_description)/urdf/sensors/lidar.xacro" />  
+  <xacro:include filename="$(find linorobot2_description)/urdf/sensors/gps.urdf.xacro" />  
   <!-- vlp-16 -->  
   <xacro:include filename="$(find linorobot2_description)/urdf/controllers/skid_steer.urdf.xacro" />
   <xacro:include filename="$(find ros2_livox_simulation)/urdf/mid360.xacro" />
@@ -88,4 +89,21 @@
     wheel_radius="${wheel_radius}"
     wheel_torque="${wheel_torque}"
   />
+
+  <link name="camera_init"/>
+      
+  <joint name="camera_init_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_init"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="lidar_link"/>
+      
+  <joint name="lidar_link_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+
 </robot>
