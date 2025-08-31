@@ -1,0 +1,40 @@
+# navsat_transform_node.yaml: LIO-SAM과 함께 사용하기 위한 올바른 설정
+
+navsat_transform_node:
+  ros__parameters:
+    # GPS 데이터 변환 주기 (Hz)
+    frequency: 30.0
+
+    # LIO-SAM이 안정화될 때까지 기다리는 시간 (초)
+    delay: 3.0
+    transform_timeout: 0.1
+    # 자기 편각 (라디안). 경기 하남시 기준 약 -0.158 rad (2025년 9월 기준)
+    magnetic_declination_radians: -0.158
+
+    # IMU의 Yaw 오프셋 (라디안).
+    yaw_offset: 1.570796327
+
+    # GPS의 첫 수신 위치를 지도 원점(0,0,0)으로 사용할지 여부
+    zero_altitude: true
+
+    # 변환된 GPS 위치(/odometry/gps)를 발행할지 여부
+    publish_filtered_gps: true
+
+    # IMU의 Yaw 값을 사용하여 GPS의 방향을 보정 (LIO-SAM의 Yaw 대신)
+    use_odometry_yaw: true
+
+    # GPS 원점(datum)이 명시적으로 설정될 때까지 기다릴지 여부
+    wait_for_datum: true
+
+    world_frame: "map"
+
+    # --- ★★★ 가장 중요한 수정 사항 ★★★ ---
+    # LIO-SAM의 최종 결과물을 입력받아 GPS 변환의 기준을 잡음
+    # odom_topic: /lio_sam/mapping/odometry
+    odom_topic: /odom/wheel
+    
+    # GPS 수신기에서 발행하는 토픽
+    gps_topic: /gps/fix
+    
+    # IMU 데이터 토픽 (자기 편각 보정에 사용)
+    imu_topic: /imu/data

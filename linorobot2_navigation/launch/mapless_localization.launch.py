@@ -24,24 +24,6 @@ def generate_launch_description():
                 ekf_config_path
             ],
     )
-
-    # robot_localization의 NavSat Transform 노드 실행
-    navsat_transform_node = Node(
-        package='robot_localization',
-        executable='navsat_transform_node',
-        name='navsat_transform_node',
-        output='screen',
-        parameters=[
-                {'use_sim_time': use_sim_time}, 
-                ekf_config_path
-            ],
-        # navsat_transform_node는 토픽 이름 리맵핑이 필요한 경우가 많음
-        remappings=[('imu', '/imu/data'), # 실제 IMU 토픽 이름으로 변경
-                    ('gps/fix', '/gps/fix'), # 실제 GPS 토픽 이름으로 변경
-                    ('odometry/filtered', '/odometry/filtered')] # EKF 출력 토픽
-    )
-
     return LaunchDescription([
         robot_localization_node,
-        navsat_transform_node
     ])
