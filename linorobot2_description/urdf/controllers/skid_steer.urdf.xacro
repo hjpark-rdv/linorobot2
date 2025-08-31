@@ -20,10 +20,10 @@
         <updateRate>100</updateRate>
         <max_wheel_acceleration>1.0</max_wheel_acceleration>
         <robot_base_frame>base_link</robot_base_frame>
-        <publish_odom>false</publish_odom>
+        <publish_odom>true</publish_odom>
         <publish_odom_tf>false</publish_odom_tf>
         <publish_wheel_tf>false</publish_wheel_tf>
-        <odometry_frame>odom_gazebo</odometry_frame>
+        <odometry_frame>odom</odometry_frame>
       </plugin>
     </gazebo>
   </xacro:macro>

@@ -90,7 +90,7 @@
     wheel_torque="${wheel_torque}"
   />
 
-  <link name="camera_init"/>
+  <!-- <link name="camera_init"/>
       
   <joint name="camera_init_joint" type="fixed">
     <parent link="base_link"/>
@@ -104,6 +104,6 @@
     <parent link="base_link"/>
     <child link="lidar_link"/>
     <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-  </joint>
+  </joint> -->
 
 </robot>

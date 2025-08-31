@@ -26,9 +26,9 @@ from launch_ros.descriptions import ComposableNode
 def generate_launch_description():
     use_sim_time = True
 
-    ekf_config_path = PathJoinSubstitution(
-        [FindPackageShare("linorobot2_base"), "config", "ekf.yaml"]
-    )
+    # ekf_config_path = PathJoinSubstitution(
+    #     [FindPackageShare("linorobot2_base"), "config", "ekf.yaml"]
+    # )
 
     world_path = PathJoinSubstitution(
         [FindPackageShare("linorobot2_gazebo"), "worlds", "playground.world"]
@@ -117,17 +117,17 @@ def generate_launch_description():
             name='command_timeout'
         ),
 
-        Node(
-            package='robot_localization',
-            executable='ekf_node',
-            name='ekf_filter_node',
-            output='screen',
-            parameters=[
-                {'use_sim_time': use_sim_time}, 
-                ekf_config_path
-            ],
-            remappings=[("odometry/filtered", LaunchConfiguration("odom_topic"))]
-        ),
+        # Node(
+        #     package='robot_localization',
+        #     executable='ekf_node',
+        #     name='ekf_filter_node',
+        #     output='screen',
+        #     parameters=[
+        #         {'use_sim_time': use_sim_time}, 
+        #         ekf_config_path
+        #     ],
+        #     remappings=[("odometry/filtered", LaunchConfiguration("odom_topic"))]
+        # ),
         # RViz node
         
         Node(
